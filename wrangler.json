@@ -2,6 +2,7 @@
     "name": "cinepro-core",
     "main": "dist/server.js",
     "compatibility_date": "2026-05-24",
+    "compatibility_flags": ["nodejs_compat"],
     "build": {
         "command": "npm install && npm run build"
     },
