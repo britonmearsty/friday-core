@@ -3,19 +3,13 @@
   "builds": [
     {
       "src": "dist/worker.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "dist/providers/**",
-          "dist/utils/**"
-        ]
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/worker.js"
+      "dest": "dist/worker.js"
     }
   ],
   "env": {

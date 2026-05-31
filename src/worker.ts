@@ -2,10 +2,26 @@ import { knownThirdPartyProxies } from './thirdPartyProxies.js';
 import { streamPatterns } from './streamPatterns.js';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import http from 'node:http';
+
+declare global {
+  interface ExecutionContext {
+    waitUntil(promise: Promise<void>): void;
+    passThroughOnException(): void;
+    readonly clientId: string;
+  }
+}
 
 let serverPromise: Promise<any> | undefined;
 
-async function initializeServer() {
+async function initializeServer(env?: Record<string, string>) {
+  // Merge env into process.env for OMSS framework compatibility
+  if (env) {
+    for (const [key, value] of Object.entries(env)) {
+      process.env[key] = value;
+    }
+  }
+
   const { OMSSServer } = await import('@omss/framework');
   const instance = new OMSSServer({
     name: 'CinePro',
@@ -64,51 +80,32 @@ async function initializeServer() {
   return instance.getInstance();
 }
 
-export async function getServer() {
+export async function getServer(env?: Record<string, string>) {
   if (!serverPromise) {
-    serverPromise = initializeServer();
+    serverPromise = initializeServer(env);
   }
   return serverPromise;
 }
 
-type WorkerExecutionContext = {
-  waitUntil(promise: Promise<void>): void;
-  passThroughOnException(): void;
-  readonly clientId: string;
-};
-
-// Cloudflare Workers / Vercel Serverless Function handler
+// Vercel Serverless Function handler (Node.js format)
 export default async function handler(
-  request: Request,
-  env: Record<string, string>,
-  ctx: WorkerExecutionContext
-): Promise<Response> {
-  // Merge Vercel env with process.env
-  if (env) {
-    for (const [key, value] of Object.entries(env)) {
-      process.env[key] = value;
-    }
-  }
-
+  request: http.IncomingMessage,
+  reply: http.ServerResponse
+): Promise<void> {
   const s = await getServer();
   await s.ready();
 
-  const url = new URL(request.url);
   const result = await s.inject({
-    method: request.method as any,
-    url: url.pathname + url.search,
-    headers: Object.fromEntries(request.headers.entries())
+    method: request.method,
+    url: request.url,
+    headers: request.headers as Record<string, string>
   });
 
-  const responseHeaders: Record<string, string> = {};
+  reply.statusCode = result.statusCode;
   for (const [key, value] of Object.entries(result.headers)) {
     if (value !== undefined && value !== null) {
-      responseHeaders[key] = Array.isArray(value) ? value.join(', ') : String(value);
+      reply.setHeader(key, Array.isArray(value) ? value.join(', ') : String(value));
     }
   }
-
-  return new Response(result.body, {
-    status: result.statusCode,
-    headers: responseHeaders
-  });
+  reply.end(result.body);
 }
