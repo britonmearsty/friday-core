@@ -28,7 +28,7 @@ async function initializeServer(env?: Record<string, string>) {
     version: '1.0.0',
     host: process.env.HOST ?? 'localhost',
     port: Number(process.env.PORT ?? 3000),
-    publicUrl: process.env.PUBLIC_URL,
+    publicUrl: process.env.PUBLIC_URL ?? `https://${process.env.VERCEL_URL}`,
     cache: {
       type: (process.env.CACHE_TYPE as 'memory' | 'redis') ?? 'memory',
       ttl: {

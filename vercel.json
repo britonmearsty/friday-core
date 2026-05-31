@@ -17,6 +17,7 @@
     "CACHE_TYPE": "memory",
     "STREMIO_ADDON": "true",
     "CORS_ORIGIN": "*",
-    "MCP_ENABLED": "true"
+    "MCP_ENABLED": "true",
+    "PUBLIC_URL": "https://core-amber-three.vercel.app"
   }
 }
