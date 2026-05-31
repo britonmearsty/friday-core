@@ -57,12 +57,18 @@ async function main() {
             // exposes a stremio addon on /stremio/manifest.json
             enableNativeAddon: process.env.STREMIO_ADDON === 'true',
             // you can your own custom stremio addons as sources into cinepro.
-            stremioAddons: []
+            stremioAddons: [
+                {
+                    id: 'notorrent2',
+                    url: 'https://addon.notorrent2.workers.dev/manifest.json',
+                    enabled: true
+                }
+            ]
             /*
             stremioAddons: [
                 {
-                    id: 'some-unique-id',
-                    url: 'https://example.com/manifest.json',
+                    id: 'torrentio',
+                    url: 'https://torrentio.strem.fun/manifest.json',
                     enabled: true
                 }
             ]

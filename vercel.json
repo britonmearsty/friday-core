@@ -2,14 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server.js",
-      "use": "@vercel/node"
+      "src": "dist/worker.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "dist/providers/**",
+          "dist/utils/**"
+        ]
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/server.js"
+      "dest": "/dist/worker.js"
     }
   ],
   "env": {
